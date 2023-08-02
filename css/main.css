@@ -1,0 +1,29 @@
+.board {
+    padding-top: 60px;
+    width: 250px;
+    margin: auto;
+}
+
+table {
+    border-collapse:separate;
+    border-spacing: 10px;
+}
+
+.cell {
+    width: 35px;
+    height: 50px;
+    border-radius: 7px;
+}
+.hidden {
+    background-color: grey;
+    width:50px;
+    height:50px;
+    text-align: center;
+}
+
+.empty {
+    background-color: rgb(218, 218, 218);
+    width: 50px;
+    height: 50px;
+    text-align: center;
+}
