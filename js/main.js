@@ -290,6 +290,7 @@ function getCellNegs(i, j) {
 }
 
 function onRightClick(elCell, i, j) {
+    addEventListener("contextmenu", (e) => {e.preventDefault()});
     console.log('hey')
     const cell = gBoard[i][j]
     if (!cell.isShown) {
