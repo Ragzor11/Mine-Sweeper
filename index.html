@@ -10,10 +10,19 @@
 
   <body onload="onInit()">
     <h1>Minesweeper </h1>
+    <div class="timer">0</div>
+    <h3>Lives left:<span>3</span></h3>
+    <button class="Easy" onclick="changeLevel('Easy')">Easy</button>
+    <button class="Hard" onclick="changeLevel('Hard')">Hard</button>
+    <button class="Extreme" onclick="changeLevel('Extreme')">Extreme</button>
     <table class="board">
       <tbody class="board-cells">
       </tbody>
     </table>
+    <div class="modal hide">
+      <h2 class="title"><span></span></h2>
+  </div>
+    <button class="restartBtn" onclick="restartGame()">😀</button>
     <footer>Denis </footer>
 
     <script src="js/main.js"></script>
