@@ -10,8 +10,10 @@
 
   <body onload="onInit()">
     <h1>Minesweeper </h1>
+    <button class="darkmode" onclick="toggleDarkMode()">Toggle Dark Mode!</button>
     <div class="timer">0</div>
     <h3>Lives left:<span>3</span></h3>
+    <h4>Bombs left:<span></span></h4>
     <button class="Easy" onclick="changeLevel('Easy')">Easy</button>
     <button class="Hard" onclick="changeLevel('Hard')">Hard</button>
     <button class="Extreme" onclick="changeLevel('Extreme')">Extreme</button>
@@ -23,7 +25,9 @@
       <h2 class="title"><span></span></h2>
   </div>
     <button class="restartBtn" onclick="restartGame()">😀</button>
-    <footer>Denis </footer>
+    <button class="hintBtn" onclick="hint()">💡<span>3</span></button>
+
+    <footer>Made By Denis </footer>
 
     <script src="js/main.js"></script>
   </body>

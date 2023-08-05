@@ -11,14 +11,14 @@
 // Step3 – click to reveal:✅✅
 // 1. When clicking a cell, call the onCellClicked() function.✅
 // 2. Clicking a safe cell reveals the minesAroundCount of this cell✅
-// Step4 – randomize mines' location:✅
+// Step4 – randomize mines' location:✅✅
 // 1. Add some randomicity for mines location✅
 // 2. After you have this functionality working– its best to comment
 // the code and switch back to static location to help you focus✅
 // during the development phase
-// Step5 –
+// Step5 –✅✅
 // 1. Add a footer with your name✅
-// 2. Upload to git
+// 2. Upload to git✅
 
 
 const MINE = '💣'
@@ -28,9 +28,11 @@ const EMPTY = ''
 var gBoard
 var gLives = 3
 var gBombsToFind = 2
-var cellsClicked = 0
 var timerInterval
 var gTimer = 0
+var cellsClicked = 0
+var hints = 3
+var hintsAreOn = false
 
 
 
@@ -45,11 +47,27 @@ var gGame = {
     secsPassed: 0
 }
 
-function onInit() {
-    gBoard = createBoard(gLevel.SIZE)
+function onInit(difficulty = 1, mines = 2, size = 4) {
+    gLives = 1
+    gBombsToFind = 2
+    if (difficulty === 1) {
+        gLives = 1
+        gBombsToFind = mines
+
+    }
+    if (difficulty === 2) {
+        gLives = 3
+        gBombsToFind = mines
+
+    }
+    if (difficulty === 3) {
+        gLives = 3
+        gBombsToFind = mines
+    }
+    console.log(gLives)
+    gBoard = createBoard(size)
     renderBoard()
     clearInterval(timerInterval)
-    gLives = 3
     gTimer = 0
     var elTimer = document.querySelector('.timer')
     elTimer.innerText = gTimer + 's'
@@ -60,22 +78,24 @@ function onInit() {
     var elLives = document.querySelector('h3 span')
     elLives.innerText = gLives
     cellsClicked = 0
+    const elModal = document.querySelector('.modal')
+    elModal.classList.add('hide')
+    gGame.isOver = false
+    var elLives = document.querySelector('h4 span')
+    elLives.innerText = gBombsToFind
+    hints = 3
 }
 function changeLevel(difficulty) {
     if (difficulty === 'Easy') {
-        gLevel.SIZE = 4
-        gLevel.MINES = 2
+        onInit(1, 2, 4)
     }
     if (difficulty === 'Hard') {
-        gLevel.SIZE = 8
-        gLevel.MINES = 14
+        onInit(2, 14, 8)
     }
     if (difficulty === 'Extreme') {
-        gLevel.SIZE = 12
-        gLevel.MINES = 32
+        onInit(3, 32, 12)
     }
-    gBoard = createBoard(gLevel.SIZE)
-    renderBoard()
+
 }
 
 
@@ -104,14 +124,19 @@ function renderBoard() {
         for (var j = 0; j < gBoard[0].length; j++) {
             const cell = gBoard[i][j]
             var className = `cell-${i}-${j}`
-            className += ' hidden'
-            if (cell.isMine) {
-                className = `mine-${i}-${j}`
-                className += ' hidden'
+            if (cell.isFirstClicked) {
+                className += ' empty'
             }
-            if (cell.isNeighbor) {
-                className = `neighbor-${i}-${j}`
+            if (!cell.isFirstClicked) {
                 className += ' hidden'
+                if (cell.isMine) {
+                    className = `mine-${i}-${j}`
+                    className += ' hidden'
+                }
+                if (cell.isNeighbor) {
+                    className = `neighbor-${i}-${j}`
+                    className += ' hidden'
+                }
             }
             const title = `Cell: ${i}, ${j}`
             strHTML += `\t<td  
@@ -125,10 +150,12 @@ function renderBoard() {
     }
     const elCells = document.querySelector('.board-cells')
     elCells.innerHTML = strHTML
+
     setMinesNegsCount(gBoard)
-    console.log(gBoard)
+  
 }
-function setMinesNegsCount(board) {
+
+function setMinesNegsCount(board,) {
     const boardIdxs = []
     for (var i = 0; i < board.length; i++) {
         for (var j = 0; j < board.length; j++) {
@@ -153,6 +180,7 @@ function setMinesNegsCount(board) {
             board[rowIdx][colIdx].isNeighbor = true
         }
         minesCount = 0
+
     }
 }
 function onCellClicked(elCell, i, j) {
@@ -166,9 +194,15 @@ function onCellClicked(elCell, i, j) {
         currCell.isMine = false
         gGame.showncCount++;
         elCell.classList.add('empty')
-        createMines()
         cellsClicked++
+        createMines()
+        renderBoard()
+        if(currCell.minesAroundCount){
+            elCell.innerHTML = currCell.minesAroundCount
+        }
+        
     }
+
     if (!currCell.isMine) {
         elCell.classList.add('empty')
         if (currCell.minesAroundCount > 0) {
@@ -190,6 +224,8 @@ function onCellClicked(elCell, i, j) {
         checkLose()
     }
     checkWin()
+
+
 }
 function checkNeighborEmptyCells(rowIdx, colIdx) {
     for (var i = rowIdx - 1; i <= rowIdx + 1; i++) {
@@ -229,17 +265,32 @@ function checkLose() {
         gGame.isOver = true
 
     }
+    gBombsToFind--
+    var elMines = document.querySelector('h4 span')
+    elMines.innerText = gBombsToFind
 }
 function createMines() {
-    for (var k = 0; k < gLevel.MINES; k++) {
-        var i = getRandomInt(0, gLevel.SIZE)
-        var j = getRandomInt(0, gLevel.SIZE)
-        if (!gBoard[i][j].isFirstClicked) {
-            gBoard[i][j].isMine = true
+    var mines = 0
+    var cellsNotFirstClicked = []
+    for (var i = 0; i < gBoard.length; i++) {
+        for (var j = 0; j < gBoard[i].length; j++) {
+            const currCell = gBoard[i][j]
+            currCell.i = i
+            currCell.j = j
+            if (!currCell.isFirstClicked) cellsNotFirstClicked.push(currCell)
         }
-        else { i-- }
     }
-    renderBoard()
+    shuffle(cellsNotFirstClicked)
+    console.log(cellsNotFirstClicked)
+    while (mines < gBombsToFind) {
+        const cell = cellsNotFirstClicked.pop()
+        console.log(cell)
+        var i = cell.i
+        var j = cell.j
+        gBoard[i][j].isMine = true
+        mines++
+    }
+
 }
 
 function getClassName(i, j) {
@@ -256,7 +307,6 @@ function getRandomInt(min, max) {
 }
 
 function openNegs(i, j) {
-    console.log('hey')
     const cellNegs = getCellNegs(i, j)
     console.log(cellNegs);
     for (var k = 0; k < cellNegs.length; k++) {
@@ -267,6 +317,7 @@ function openNegs(i, j) {
             elNeighborCell.classList.remove('hidden')
             elNeighborCell.classList.add('empty')
             elNeighborCell.innerText = gBoard[currCell.i][currCell.j].minesAroundCount
+
         }
         else if (!gBoard[currCell.i][currCell.j].isNeighbor && !gBoard[currCell.i][currCell.j].isMine) {
             gBoard[currCell.i][currCell.j].isShown = true
@@ -290,7 +341,7 @@ function getCellNegs(i, j) {
 }
 
 function onRightClick(elCell, i, j) {
-    addEventListener("contextmenu", (e) => {e.preventDefault()});
+    addEventListener("contextmenu", (e) => { e.preventDefault() });
     console.log('hey')
     const cell = gBoard[i][j]
     if (!cell.isShown) {
@@ -303,6 +354,8 @@ function onRightClick(elCell, i, j) {
         }
     }
     if (cell.isMine) gBombsToFind--
+    var elMines = document.querySelector('h4 span')
+    elMines.innerText = gBombsToFind
     checkWin()
 }
 function checkWin() {
@@ -315,7 +368,7 @@ function checkWin() {
 
         }
     }
-    if (shownCells === Math.pow(gLevel.SIZE, 2) - 2 && gBombsToFind === 0) {
+    if (shownCells === Math.pow(gLevel.SIZE, 2) - gLevel.MINES && gBombsToFind === 0) {
         clearInterval(timerInterval)
         const elModalText = document.querySelector('.modal h2')
         elModalText.innerText = "You WON!!!!\n You can hit the button below if you want to play again"
@@ -324,6 +377,7 @@ function checkWin() {
         const elModal = document.querySelector('.modal')
         elModal.classList.remove('hide')
         gGame.isOver = true
+        shownCells = 0
     }
 }
 function timer() {
@@ -335,5 +389,30 @@ function timer() {
     }
 }
 function restartGame() {
-    location.reload()
+    onInit()
 }
+function shuffle(array) {
+    let currentIndex = array.length, randomIndex;
+
+    // While there remain elements to shuffle.
+    while (currentIndex != 0) {
+
+        // Pick a remaining element.
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+
+        // And swap it with the current element.
+        [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex], array[currentIndex]];
+    }
+
+    return array;
+}
+function toggleDarkMode() {
+    var element = document.body;
+    element.classList.toggle("dark-mode");
+  }
+  function hint(){
+    console.log('hey')
+    hintsAreOn = true
+  }
